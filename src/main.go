@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 )
@@ -40,23 +39,30 @@ func main() {
 	if err != nil {
 		panic("Не могу прочитать файл")
 	}
-	dataString := string(data)
+	dataString := string(data) + "<h4>"
 
 	var result string
 
 	for {
+		// блок от названия до названия
 		block := getInnerData(dataString, "<h4>", "<h4>")
 		if block == nil {
 			break
 		}
+
+		// ссылка
+		link := getInnerData(block.data, "href=\"", "\"")
+		result += link.data + "\n"
+
+		// название
 		name := getInnerData(block.data, "</a>", "</h4>")
-		result += name.data + "\n"
-		// fmt.Println(name.data)
+		result += clearString(name.data) + "\n"
 
+		// описание
 		description := getInnerData(block.data, "<p>", "</p>")
-		result += description.data + "\n"
-		// fmt.Println(description.data)
+		result += clearString(description.data) + "\n"
 
+		// таблица
 		table := getInnerData(block.data, "<tbody>", "</tbody>")
 		if table == nil {
 			dataString = dataString[block.indexEnd:]
@@ -64,6 +70,7 @@ func main() {
 		}
 
 		for {
+			// строка
 			row := getInnerData(table.data, "<tr>", "</tr>")
 			if row == nil {
 				break
@@ -71,11 +78,12 @@ func main() {
 
 			var rowString string
 			for {
+				// ячейка
 				cell := getInnerData(row.data, "<td>", "</td>")
 				if cell == nil {
 					break
 				}
-				rowString += cell.data + "\n"
+				rowString += clearString(cell.data) + "\n"
 				row.data = row.data[cell.indexEnd:]
 			}
 			result += rowString + "\n"
@@ -85,6 +93,9 @@ func main() {
 
 		dataString = dataString[block.indexEnd:]
 	}
+
+	indexStart := strings.Index(result, "#update")
+	result = result[indexStart:]
 
 	f, err := os.Create("./output/result.html")
 	if err != nil {
@@ -129,25 +140,19 @@ func getInnerData(dataString, tagStart, tagEnd string) *InnerDataResult {
 	return result
 }
 
-func printType(typeTG Type) {
-	fmt.Println("Название: " + typeTG.name)
-	fmt.Println("Описание: " + typeTG.description)
-	for _, f := range typeTG.fields {
-		fmt.Print("field: ", f.name, ", ")
-		fmt.Print("type: ", f.typeField, ", ")
-		fmt.Print("desc: ", f.description, "\n")
-	}
-	fmt.Println()
-}
+func clearString(line string) string {
+	for {
+		indexStart := strings.Index(line, "<")
+		if indexStart == -1 {
+			break
+		}
+		indexEnd := strings.Index(line, ">")
+		if indexEnd == -1 {
+			break
+		}
 
-func printMethod(methodTG Method) {
-	fmt.Println("Название: " + methodTG.name)
-	fmt.Println("Описание: " + methodTG.description)
-	for _, f := range methodTG.parameters {
-		fmt.Print("field: ", f.name, ", ")
-		fmt.Print("type: ", f.typeField, ", ")
-		fmt.Print("required: ", f.required, ", ")
-		fmt.Print("desc: ", f.description, "\n")
+		line = line[:indexStart] + line[indexEnd+1:]
 	}
-	fmt.Println()
+
+	return line
 }
