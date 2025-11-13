@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"unicode"
 )
 
 var index int
@@ -43,115 +42,112 @@ func main() {
 	}
 	dataString := string(data)
 
-	// var result string
+	var result string
 
 	for {
-		// получение <h4> ... </h4>
-		var tagString string
-		index, tagString = getInnerData(dataString, "<h4>", "</h4>")
-		if index == -1 {
+		block := getInnerData(dataString, "<h4>", "<h4>")
+		if block == nil {
 			break
 		}
+		name := getInnerData(block.data, "</a>", "</h4>")
+		result += name.data + "\n"
+		// fmt.Println(name.data)
 
-		indexH4End := index
+		description := getInnerData(block.data, "<p>", "</p>")
+		result += description.data + "\n"
+		// fmt.Println(description.data)
 
-		// получение имени
-		var name string
-		index, name = getInnerData(tagString, "</a>", "")
-		fmt.Println("Название: " + name)
-
-		// получение описания
-		var desc string
-		index, desc = getInnerData(dataString, "<p>", "</p>")
-		fmt.Println("Описание: " + desc + "\n")
-
-		// проверка на наличие таблицы
-		nextH4 := strings.Index(dataString[indexH4End:], "<h4>")
-		nextTbody := strings.Index(dataString[indexH4End:], "<tbody>")
-		if nextH4 != -1 && nextTbody > nextH4 {
-			dataString = dataString[nextH4:]
+		table := getInnerData(block.data, "<tbody>", "</tbody>")
+		if table == nil {
+			dataString = dataString[block.indexEnd:]
 			continue
 		}
 
-		// получение полей
-		var fields string
-		index, fields = getInnerData(dataString, "<tbody>", "</tbody>")
-		// fmt.Println("Поля: " + fields)
-
-		// создание структур Type | Method
-		if unicode.IsUpper(rune(name[0])) {
-			typeTG := Type{}
-			typeTG.name = name
-			typeTG.description = desc
-
-			for {
-				var i int
-
-				var name string
-				i, name = getInnerData(fields, "<td>", "</td>")
-				if i == -1 {
-					break
-				}
-				fields = fields[i:]
-
-				var typeField string
-				i, typeField = getInnerData(fields, "<td>", "</td>")
-
-				if i == -1 {
-					break
-				}
-				fields = fields[i:]
-
-				var desc string
-				i, desc = getInnerData(fields, "<td>", "</td>")
-
-				if i == -1 {
-					break
-				}
-
-				field := Field{
-					name:        name,
-					typeField:   typeField,
-					description: desc,
-				}
-
-				fmt.Print("field: ", field.name, ", ")
-				fmt.Print("type: ", field.typeField, ", ")
-				fmt.Print("desc: ", field.description, "\n")
-				fields = fields[i:]
+		for {
+			row := getInnerData(table.data, "<tr>", "</tr>")
+			if row == nil {
+				break
 			}
 
-		} else {
-			methodTG := Method{}
-			methodTG.name = name
+			var rowString string
+			for {
+				cell := getInnerData(row.data, "<td>", "</td>")
+				if cell == nil {
+					break
+				}
+				rowString += cell.data + "\n"
+				row.data = row.data[cell.indexEnd:]
+			}
+			result += rowString + "\n"
+
+			table.data = table.data[row.indexEnd:]
 		}
 
-		dataString = dataString[index:]
+		dataString = dataString[block.indexEnd:]
 	}
 
-	// f, err := os.Create("./output/result.html")
-	// if err != nil {
-	// 	panic("Не получилось создать файл")
-	// }
+	f, err := os.Create("./output/result.html")
+	if err != nil {
+		panic("Не получилось создать файл")
+	}
 
-	// _, err = f.WriteString(result)
-	// if err != nil {
-	// 	panic("Не получилось записать в файл")
-	// }
+	_, err = f.WriteString(result)
+	if err != nil {
+		panic("Не получилось записать в файл")
+	}
 }
 
-func getInnerData(dataString, tagStart, tagEnd string) (int, string) {
-	indexStart := strings.Index(dataString, tagStart) + len(tagStart)
-	if indexStart-len(tagStart) == -1 {
-		return -1, ""
+type InnerDataResult struct {
+	indexEnd int
+	data     string
+}
+
+func getInnerData(dataString, tagStart, tagEnd string) *InnerDataResult {
+	indexStart := strings.Index(dataString, tagStart)
+	if indexStart == -1 {
+		return nil
 	}
+	indexStart += len(tagStart)
+
 	var indexEnd int
 	if tagEnd == "" {
 		indexEnd = len(dataString)
 	} else {
 		indexOffset := strings.Index(dataString[indexStart:], tagEnd)
+		if indexOffset == -1 {
+			return nil
+		}
+
 		indexEnd = indexStart + indexOffset
 	}
 
-	return indexEnd, dataString[indexStart:indexEnd]
+	result := &InnerDataResult{
+		indexEnd: indexEnd,
+		data:     dataString[indexStart:indexEnd],
+	}
+
+	return result
+}
+
+func printType(typeTG Type) {
+	fmt.Println("Название: " + typeTG.name)
+	fmt.Println("Описание: " + typeTG.description)
+	for _, f := range typeTG.fields {
+		fmt.Print("field: ", f.name, ", ")
+		fmt.Print("type: ", f.typeField, ", ")
+		fmt.Print("desc: ", f.description, "\n")
+	}
+	fmt.Println()
+}
+
+func printMethod(methodTG Method) {
+	fmt.Println("Название: " + methodTG.name)
+	fmt.Println("Описание: " + methodTG.description)
+	for _, f := range methodTG.parameters {
+		fmt.Print("field: ", f.name, ", ")
+		fmt.Print("type: ", f.typeField, ", ")
+		fmt.Print("required: ", f.required, ", ")
+		fmt.Print("desc: ", f.description, "\n")
+	}
+	fmt.Println()
 }
