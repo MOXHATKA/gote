@@ -11,7 +11,7 @@ type ReplyMarkup any
 type {{.NameUpperCamelCase}} struct {
 	{{range .Fields}}
 	// {{.Description}}
-	{{.NameUpperCamelCase}} {{.TypeField}} `json:"{{.NameSnakeCase}}{{if .Required}},omitempty{{end}}"`
+	{{.NameUpperCamelCase}} {{.TypeField}} `json:"{{.NameSnakeCase}}{{if not .Required}},omitempty{{end}}"`
 	{{end}}
 }
 {{end}}

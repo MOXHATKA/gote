@@ -13,6 +13,7 @@ type TgObject struct {
 	Name               string
 	NameUpperCamelCase string
 	Description        string
+	List               []string
 	Note               string
 	ReturnType         string
 	IsPrimitiveType    bool
@@ -66,6 +67,13 @@ func Generate() {
 		// описание
 		description := getTagData(block.data, "<p>", "</p>")
 
+		// список
+		var list []string
+		listHtml := getTagData(block.data, "<ul>", "</ul>")
+		if listHtml != nil {
+			list = makeListFromTags(listHtml.data)
+		}
+
 		// заметка
 		blockquote := getTagData(block.data, "<blockquote>", "</blockquote>")
 		var note string
@@ -80,6 +88,7 @@ func Generate() {
 			NameUpperCamelCase: toUpperCamelCase(clearString(name.data)),
 			Description:        clearString(description.data),
 			Note:               note,
+			List:               list,
 		}
 
 		// проверка типа по первой букве имени
@@ -377,4 +386,18 @@ func searchReturnType(text string) string {
 	}
 
 	return ""
+}
+
+func makeListFromTags(text string) []string {
+	listTags := []string{}
+	for {
+		li := getTagData(text, "<li>", "</li>")
+		if li == nil {
+			break
+		}
+		listTags = append(listTags, clearString(li.data))
+		text = text[li.indexEnd:]
+	}
+
+	return listTags
 }
