@@ -16,6 +16,10 @@ type TGResponse[T any] struct {
 
 func requestWithContext(ctx context.Context, url string, data []byte) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewBuffer(data))
+	if err != nil {
+		return nil, err
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
