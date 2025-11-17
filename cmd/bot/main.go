@@ -24,4 +24,6 @@ func main() {
 	}
 
 	fmt.Printf("Бот: %s (@%s), ID: %d\n", user.FirstName, user.Username, user.Id)
+
+	bot.RunUpdate()
 }
