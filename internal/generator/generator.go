@@ -375,14 +375,30 @@ func searchReturnType(text string) string {
 		return ""
 	}
 
-	innerTagData := getTagData(text[indexAnchorWord:], "<a>", "</a>")
-	if innerTagData != nil {
-		return innerTagData.data
+	text = text[indexAnchorWord:]
+
+	prefix := ""
+	for {
+		indexArray := strings.Index(text, "Array of")
+		if indexArray == -1 {
+			break
+		}
+		prefix += "[]"
+		text = text[indexArray+9:]
 	}
 
-	innerTagData = getTagData(text[indexAnchorWord:], "<em>", "</em>")
+	packageName := "types"
+	innerTagData := getTagData(text, "<a>", "</a>")
 	if innerTagData != nil {
-		return convertTypeTgToGo("", innerTagData.data)
+		if len(prefix) == 0 {
+			prefix = "*"
+		}
+		return prefix + packageName + "." + innerTagData.data
+	}
+
+	innerTagData = getTagData(text, "<em>", "</em>")
+	if innerTagData != nil {
+		return prefix + convertTypeTgToGo("", innerTagData.data)
 	}
 
 	return ""
