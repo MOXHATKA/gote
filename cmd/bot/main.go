@@ -9,6 +9,10 @@ import (
 	"os"
 )
 
+func StartHandler(ctx context.Context, update types.Update) {
+	fmt.Println("Я сказала стартуем!")
+}
+
 func main() {
 	_ = env.Load(".env")
 	token := os.Getenv("BOT_TOKEN")
@@ -17,6 +21,7 @@ func main() {
 	}
 
 	bot := bot.NewBot(token)
+	bot.AddCommand("/start", StartHandler)
 	ctx := context.Background()
 	user, err := bot.GetMe(ctx, types.GetMe{})
 	if err != nil {
