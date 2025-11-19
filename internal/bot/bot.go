@@ -38,11 +38,11 @@ func NewBot(token string) *Bot {
 		Condition: "/menu",
 	}
 
-	startState.Children = append(startState.Children, endState)
-	endState.Children = append(endState.Children, menuState)
-	menuState.Children = append(menuState.Children, []State{
-		startState,
-		endState,
+	startState.Children = append(startState.Children, &endState)
+	endState.Children = append(endState.Children, &menuState)
+	menuState.Children = append(menuState.Children, []*State{
+		&startState,
+		&endState,
 	}...)
 
 	bot := &Bot{
@@ -52,9 +52,9 @@ func NewBot(token string) *Bot {
 	bot.Commands = map[string]Handler{}
 	bot.Handlers = map[string]Handler{}
 	bot.StateMachine = StateMachine{
-		States:     map[int64]State{},
-		StartState: startState,
-		ResetState: menuState,
+		States:     map[int64]*State{},
+		StartState: &startState,
+		ResetState: &menuState,
 	}
 	return bot
 }
@@ -78,7 +78,7 @@ func (bot *Bot) RunUpdate() {
 			go func(ctx context.Context, updates []types.Update) {
 				for _, update := range updates {
 					id := update.Message.Chat.Id
-					bot.StateMachine.SetState(update)
+					bot.StateMachine.SetState(&update)
 					fmt.Println(bot.StateMachine.GetState(id))
 				}
 			}(bot.ctx, response)

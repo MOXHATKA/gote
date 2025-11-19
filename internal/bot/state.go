@@ -3,19 +3,19 @@ package bot
 import "gote/pkg/types"
 
 type StateMachine struct {
-	StartState State
-	States     map[int64]State
-	ResetState State
+	StartState *State
+	States     map[int64]*State
+	ResetState *State
 }
 
 type State struct {
 	Name      string
 	Condition string
 	Parent    *State
-	Children  []State
+	Children  []*State
 }
 
-func (sm *StateMachine) SetState(update types.Update) bool {
+func (sm *StateMachine) SetState(update *types.Update) bool {
 	id := update.Message.Chat.Id
 	text := update.Message.Text
 	state, ok := sm.States[id]
@@ -44,6 +44,6 @@ func (sm *StateMachine) SetState(update types.Update) bool {
 	return false
 }
 
-func (sm *StateMachine) GetState(id int64) State {
+func (sm *StateMachine) GetState(id int64) *State {
 	return sm.States[id]
 }
