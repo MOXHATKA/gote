@@ -1,10 +1,16 @@
 package state
 
-import "gote/pkg/types"
+import (
+	"gote/internal/utils/ctx"
+	"gote/pkg/types"
+)
 
-type States map[int64]*State
+type UsersState map[int64]*State
+type States map[string]*State
+type Action func(ctx.CustomContext, *types.Update, *StateMachine)
 
 type StateMachine struct {
+	UsersState UsersState
 	States     States
 	StartState *State
 	ResetState *State
@@ -13,15 +19,19 @@ type StateMachine struct {
 type State struct {
 	Name      string
 	Condition string
+	Action    Action
 	parent    *State
 	children  []*State
 }
 
-func NewState(name, condition string) *State {
-	return &State{
+func NewState(name, condition string, action Action) *State {
+	state := &State{
 		Name:      name,
 		Condition: condition,
+		Action:    action,
 	}
+
+	return state
 }
 
 func (s *State) AddChildren(state *State) {
@@ -31,19 +41,20 @@ func (s *State) AddChildren(state *State) {
 
 func NewStateMachine(start *State, reset *State) *StateMachine {
 	return &StateMachine{
+		UsersState: UsersState{},
 		States:     States{},
 		StartState: start,
 		ResetState: reset,
 	}
 }
 
-func (sm *StateMachine) SetState(update *types.Update) bool {
+func (sm *StateMachine) NextState(ctx ctx.CustomContext, update *types.Update) bool {
 	id := update.Message.Chat.Id
 	text := update.Message.Text
-	state, ok := sm.States[id]
+	state, ok := sm.UsersState[id]
 	if !ok {
-		sm.States[id] = sm.ResetState
-		return false
+		state = sm.ResetState
+		sm.UsersState[id] = sm.ResetState
 	}
 
 	children := state.children
@@ -52,13 +63,14 @@ func (sm *StateMachine) SetState(update *types.Update) bool {
 	}
 
 	if len(children) == 1 {
-		sm.States[id] = children[0]
+		sm.UsersState[id] = children[0]
+		sm.UsersState[id].Action(ctx, update, sm)
 		return true
 	}
 
 	for _, s := range children {
 		if s.Condition == text {
-			sm.States[id] = s
+			sm.UsersState[id] = s
 			return true
 		}
 	}
@@ -67,5 +79,5 @@ func (sm *StateMachine) SetState(update *types.Update) bool {
 }
 
 func (sm *StateMachine) GetState(id int64) *State {
-	return sm.States[id]
+	return sm.UsersState[id]
 }

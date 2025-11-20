@@ -1,14 +1,13 @@
 package bot
 
 import (
-	"context"
 	"fmt"
 	"gote/internal/commands"
 	"gote/internal/handlers"
 	"gote/internal/state"
+	"gote/internal/utils/ctx"
 	"gote/pkg/methods"
 	"gote/pkg/types"
-	"gote/internal/utils/ctx"
 	"log"
 )
 
@@ -23,30 +22,32 @@ type Bot struct {
 
 func NewBot(ctx ctx.CustomContext) *Bot {
 	bot := &Bot{
-		ctx: ctx,
+		ctx:      ctx,
+		Commands: &commands.Commands{},
 	}
 	return bot
 }
 
-func (b *Bot) WithCommands(commands *commands.Commands) {
-	b.Commands = commands
-	// b.enabledModules = append(b.enabledModules, "Commands")
+func (bot *Bot) OnCommand(command string, handler handlers.HandlerFunc) {
+	(*bot.Commands)[command] = handler
 }
 
-func (b *Bot) WithHandlers(handlers *handlers.Handlers) {
-	b.Handlers = handlers
-	// b.enabledModules = append(b.enabledModules, "Handlers")
-}
+// func (b *Bot) WithCommands(commands *commands.Commands) {
+// 	b.Commands = commands
+// }
+
+// func (b *Bot) WithHandlers(handlers *handlers.Handlers) {
+// 	b.Handlers = handlers
+// }
 
 func (b *Bot) WithState(stateMachine *state.StateMachine) {
 	b.StateMachine = stateMachine
-	// b.enabledModules = append(b.enabledModules, "StateMachine")
 }
 
 func (bot *Bot) RunUpdate() {
 	for {
 		select {
-		case <- bot.ctx.GoContext.Done():
+		case <-bot.ctx.GoContext.Done():
 			return
 		default:
 			response, err := methods.GetUpdates(bot.ctx, types.GetUpdates{
@@ -59,7 +60,7 @@ func (bot *Bot) RunUpdate() {
 				return
 			}
 
-			go func(ctx context.Context, updates []types.Update) {
+			go func(ctx ctx.CustomContext, updates []types.Update) {
 				for _, update := range updates {
 					msg := update.Message
 					if msg == nil {
@@ -68,19 +69,20 @@ func (bot *Bot) RunUpdate() {
 					id := update.Message.Chat.Id
 
 					text := msg.Text
-					if string(text[0]) == "/" {
-						handlerFunc, ok := (*bot.Commands)[text]
-						if ok {
-							handlerFunc(ctx, update)
-							continue
-						}
+					handlerFunc, ok := (*bot.Commands)[text]
+					if ok {
+						// bot.StateMachine.UsersState[id]
+						// bot.StateMachine.UsersState[id].Action(ctx, &update)
+						handlerFunc(ctx.GoContext, update)
+						continue
 					}
+
 					if bot.StateMachine != nil {
-						bot.StateMachine.SetState(&update)
+						bot.StateMachine.NextState(ctx, &update)
 					}
 					fmt.Println(bot.StateMachine.GetState(id))
 				}
-			}(bot.ctx.GoContext, response)
+			}(bot.ctx, response)
 
 			lenUpdate := len(response)
 			if lenUpdate > 0 {
