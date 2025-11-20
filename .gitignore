@@ -1,5 +1,5 @@
 .env
 input/
 output/
-internal/bot/methods.go
+pkg/methods/methods.go
 pkg/types/
