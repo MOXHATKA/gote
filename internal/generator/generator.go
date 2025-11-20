@@ -199,7 +199,7 @@ func Generate() {
 	templatesData := []TemplateData{
 		{Name: "types", Path: tamplatesPath, OutputPath: "./pkg/types/", Data: types},
 		{Name: "params", Path: tamplatesPath, OutputPath: "./pkg/types/", Data: params},
-		{Name: "methods", Path: tamplatesPath, OutputPath: "./internal/bot/", Data: params},
+		{Name: "methods", Path: tamplatesPath, OutputPath: "./pkg/methods/", Data: params},
 	}
 
 	for _, td := range templatesData {

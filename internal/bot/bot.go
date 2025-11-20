@@ -6,46 +6,50 @@ import (
 	"gote/internal/commands"
 	"gote/internal/handlers"
 	"gote/internal/state"
+	"gote/pkg/methods"
 	"gote/pkg/types"
+	"gote/internal/utils/ctx"
 	"log"
 )
 
 type Bot struct {
-	Token        string
-	ctx          context.Context
+	ctx          ctx.CustomContext
 	offset       int64
 	Commands     *commands.Commands
 	Handlers     *handlers.Handlers
 	StateMachine *state.StateMachine
+	// enabledModules 	 []string
 }
 
-func NewBot(token string) *Bot {
+func NewBot(ctx ctx.CustomContext) *Bot {
 	bot := &Bot{
-		Token: token,
-		ctx:   context.Background(),
+		ctx: ctx,
 	}
 	return bot
 }
 
 func (b *Bot) WithCommands(commands *commands.Commands) {
 	b.Commands = commands
+	// b.enabledModules = append(b.enabledModules, "Commands")
 }
 
 func (b *Bot) WithHandlers(handlers *handlers.Handlers) {
 	b.Handlers = handlers
+	// b.enabledModules = append(b.enabledModules, "Handlers")
 }
 
 func (b *Bot) WithState(stateMachine *state.StateMachine) {
 	b.StateMachine = stateMachine
+	// b.enabledModules = append(b.enabledModules, "StateMachine")
 }
 
 func (bot *Bot) RunUpdate() {
 	for {
 		select {
-		case <-bot.ctx.Done():
+		case <- bot.ctx.GoContext.Done():
 			return
 		default:
-			response, err := bot.GetUpdates(bot.ctx, types.GetUpdates{
+			response, err := methods.GetUpdates(bot.ctx, types.GetUpdates{
 				Limit:   100,
 				Timeout: 50,
 				Offset:  bot.offset,
@@ -76,7 +80,7 @@ func (bot *Bot) RunUpdate() {
 					}
 					fmt.Println(bot.StateMachine.GetState(id))
 				}
-			}(bot.ctx, response)
+			}(bot.ctx.GoContext, response)
 
 			lenUpdate := len(response)
 			if lenUpdate > 0 {

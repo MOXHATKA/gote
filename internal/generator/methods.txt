@@ -1,9 +1,10 @@
-package bot
+package methods
 
 import (
-	"context"
 	"encoding/json"
 	"gote/pkg/types"
+	"gote/internal/utils"
+	"gote/internal/utils/ctx"
 )
 
 const URL = "https://api.telegram.org/bot"
@@ -14,19 +15,19 @@ const URL = "https://api.telegram.org/bot"
 // {{.Note}}
 //{{else}}// {{end}}
 // https://core.telegram.org/bots/api#{{.Link}}
-func (bot *Bot) {{.NameUpperCamelCase}} (ctx context.Context, param types.{{.NameUpperCamelCase}}) ({{.ReturnType}}, error) {
+func {{.NameUpperCamelCase}} (ctx ctx.CustomContext, param types.{{.NameUpperCamelCase}}) ({{.ReturnType}}, error) {
 	data, err := json.Marshal(param)
 	if err != nil {
 		return {{.ReturnValue}}, err
 	}
 	
-	url := URL + bot.Token + "/{{.NameUpperCamelCase}}"
-	resp, err := requestWithContext(ctx, url, data)
+	url := URL + ctx.Token + "/{{.NameUpperCamelCase}}"
+	resp, err := utils.RequestWithContext(ctx.GoContext, url, data)
 	if err != nil {
 		return {{.ReturnValue}}, err
 	}	
 	
-	var result TGResponse[{{.ReturnType}}]
+	var result utils.TGResponse[{{.ReturnType}}]
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return {{.ReturnValue}}, err
 	}

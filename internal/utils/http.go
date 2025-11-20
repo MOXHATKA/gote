@@ -1,4 +1,4 @@
-package bot
+package utils
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ type TGResponse[T any] struct {
 	Parameters  *types.ResponseParameters `json:"parameters,omitempty"`
 }
 
-func requestWithContext(ctx context.Context, url string, data []byte) (*http.Response, error) {
+func RequestWithContext(ctx context.Context, url string, data []byte) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
