@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"gote/internal/state"
-	s "gote/internal/state"
 	"gote/pkg/methods"
 	"gote/pkg/types"
 )
@@ -17,11 +16,11 @@ const (
 	MenuState  = "Меню"
 )
 
-func createStateMachine() *s.StateMachine {
-	startState := s.NewState(StartState, "/start", startAction)
-	requestNameState := s.NewState(GetName, "/getName", requestName)
-	setNameState := s.NewState(SetName, "/setName", setName)
-	requestMailState := s.NewState(GetMail, "/getMail", requestMail)
+func createStateMachine() *state.StateMachine {
+	startState := state.NewState(StartState, "/start", startAction)
+	requestNameState := state.NewState(GetName, "/getName", requestName)
+	setNameState := state.NewState(SetName, "/setName", setName)
+	requestMailState := state.NewState(GetMail, "/getMail", requestMail)
 	// endState := s.NewState(EndState, "/end")
 	// menuState := s.NewState(MenuState, "/menu")
 
@@ -33,7 +32,7 @@ func createStateMachine() *s.StateMachine {
 	// menuState.AddChildren(startState)
 	// menuState.AddChildren(endState)
 
-	return s.NewStateMachine(startState, startState)
+	return state.NewStateMachine(startState, startState)
 }
 
 func startAction(ctx context.Context, update *types.Update, sm *state.StateMachine) {
