@@ -3,36 +3,29 @@ package bot
 import (
 	"context"
 	"fmt"
-	"gote/internal/commands"
-	"gote/internal/handlers"
-	"gote/internal/state"
 	"gote/pkg/methods"
 	"gote/pkg/types"
 	"log"
 )
 
 type Bot struct {
-	ctx          context.Context
-	offset       int64
-	Commands     *commands.Commands
-	Handlers     *handlers.Handlers
-	StateMachine *state.StateMachine
+	ctx        context.Context
+	offset     int64
+	States     *States
+	UsersState *UsersState
 }
 
 func NewBot(ctx context.Context) *Bot {
 	bot := &Bot{
-		ctx:      ctx,
-		Commands: &commands.Commands{},
+		ctx:        ctx,
+		States:     &States{},
+		UsersState: &UsersState{},
 	}
 	return bot
 }
 
-func (bot *Bot) OnCommand(command string, handler handlers.HandlerFunc) {
-	(*bot.Commands)[command] = handler
-}
-
-func (b *Bot) WithState(stateMachine *state.StateMachine) {
-	b.StateMachine = stateMachine
+func (bot *Bot) OnCommand(command string, stateName string) {
+	(*bot.States)[command] = (*bot.States)[stateName]
 }
 
 func (bot *Bot) RunUpdate() {
@@ -57,21 +50,22 @@ func (bot *Bot) RunUpdate() {
 					if msg == nil {
 						continue
 					}
-					id := update.Message.Chat.Id
 
+					id := msg.Chat.Id
 					text := msg.Text
-					handlerFunc, ok := (*bot.Commands)[text]
+
+					state, ok := (*bot.States)[text]
 					if ok {
-						// bot.StateMachine.UsersState[id]
-						// bot.StateMachine.UsersState[id].Action(ctx, &update)
-						handlerFunc(ctx, update)
+						(*bot.UsersState)[id] = state
+						state.Handle(ctx, &update, bot)
 						continue
 					}
 
-					if bot.StateMachine != nil {
-						bot.StateMachine.NextState(ctx, &update)
+					userState := (*bot.UsersState)[id]
+					if userState != nil {
+						fmt.Println(userState.Name)
+						userState.Handle(ctx, &update, bot)
 					}
-					fmt.Println(bot.StateMachine.GetState(id))
 				}
 			}(bot.ctx, response)
 

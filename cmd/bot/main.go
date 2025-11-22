@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
-	"fmt"
 	gotebot "gote/internal/bot"
 	"gote/internal/utils/env"
-	"gote/pkg/methods"
-	"gote/pkg/types"
 	"os"
+)
+
+const (
+	startState       = "start"
+	writeNameState   = "write_name"
+	requestMailState = "request_mail"
+	writeMailState   = "write_mail"
 )
 
 func main() {
@@ -17,22 +21,17 @@ func main() {
 		panic("Токен отсутствует")
 	}
 
-	// ctx := ctx.CustomContext{
-	// 	Token:     token,
-	// 	GoContext: context.Background(),
-	// }
 	ctxClose, closeFunc := context.WithCancel(context.Background())
 	ctx := context.WithValue(ctxClose, "token", token)
 
 	bot := gotebot.NewBot(ctx)
 
-	me, _ := methods.GetMe(ctx, types.GetMe{})
-	fmt.Println(me.FirstName, me.Id, me.Username)
+	bot.OnState(startState, RequestName)
+	bot.OnState(writeNameState, WriteName)
+	bot.OnState(requestMailState, RequestMail)
+	bot.OnState(writeMailState, WriteMail)
 
-	bot.OnCommand("/start", StartHandler)
-
-	stateMachine := createStateMachine()
-	bot.WithState(stateMachine)
+	bot.OnCommand("/start", startState)
 
 	bot.RunUpdate()
 	closeFunc()
