@@ -7,25 +7,34 @@ import (
 	"log"
 )
 
+type Config struct {
+	Token          string
+	Limit          int64
+	Timeout        int64
+	Offset         int64
+	AllowedUpdates []string
+}
+
 type Bot struct {
-	ctx        context.Context
-	offset     int64
-	API        *api.API
-	States     *States
-	UsersState *UsersState
+	ctx          context.Context
+	updateParams types.GetUpdates
+	API          *api.API
+	State        *StateStore
+	Store        *Store
 }
 
-func NewBot(ctx context.Context, token string) *Bot {
+func NewBot(ctx context.Context, config Config) *Bot {
 	return &Bot{
-		ctx:        ctx,
-		API:        api.NewAPI(token),
-		States:     &States{},
-		UsersState: &UsersState{},
+		ctx:   ctx,
+		API:   api.NewAPI(config.Token),
+		State: NewStateStore(),
+		Store: NewStore(),
+		updateParams: types.GetUpdates{
+			Limit:   config.Limit,
+			Timeout: config.Timeout,
+			Offset:  config.Offset,
+		},
 	}
-}
-
-func (bot *Bot) OnCommand(command string, stateName string) {
-	(*bot.States)[command] = (*bot.States)[stateName]
 }
 
 func (bot *Bot) Run() {
@@ -37,7 +46,7 @@ func (bot *Bot) Run() {
 			response, err := bot.API.GetUpdates(bot.ctx, types.GetUpdates{
 				Limit:   100,
 				Timeout: 50,
-				Offset:  bot.offset,
+				Offset:  bot.updateParams.Offset,
 			})
 			if err != nil {
 				log.Println("Ошибка получения Update")
@@ -54,14 +63,14 @@ func (bot *Bot) Run() {
 					id := msg.Chat.Id
 					text := msg.Text
 
-					state, ok := (*bot.States)[text]
+					state, ok := (*bot.State.States)[text]
 					if ok {
-						(*bot.UsersState)[id] = state
+						(*bot.State.UsersState)[id] = state
 						state.Handle(ctx, &update, bot)
 						continue
 					}
 
-					userState := (*bot.UsersState)[id]
+					userState := (*bot.State.UsersState)[id]
 					if userState != nil {
 						userState.Handle(ctx, &update, bot)
 					}
@@ -70,7 +79,7 @@ func (bot *Bot) Run() {
 
 			lenUpdate := len(response)
 			if lenUpdate > 0 {
-				bot.offset = response[lenUpdate-1].UpdateId + 1
+				bot.updateParams.Offset = response[lenUpdate-1].UpdateId + 1
 			}
 		}
 	}
