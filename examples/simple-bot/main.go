@@ -4,6 +4,7 @@ import (
 	"context"
 	"gote/internal/env"
 	gotebot "gote/pkg/bot"
+	"log"
 	"os"
 )
 
@@ -36,5 +37,8 @@ func main() {
 	bot.State.OnCommand("/start", startState)
 
 	// запуск цикла обновлений
-	bot.Run()
+	err := bot.Run()
+	if err != nil {
+		log.Println(err)
+	}
 }

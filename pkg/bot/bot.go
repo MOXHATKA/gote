@@ -4,7 +4,6 @@ import (
 	"context"
 	"gote/pkg/api"
 	"gote/pkg/types"
-	"log"
 )
 
 type Config struct {
@@ -24,33 +23,35 @@ type Bot struct {
 }
 
 func NewBot(ctx context.Context, config Config) *Bot {
+	if config.Limit <= 0 {
+		config.Limit = 100
+	}
+	if config.Timeout <= 0 {
+		config.Timeout = 50
+	}
 	return &Bot{
 		ctx:   ctx,
 		API:   api.NewAPI(config.Token),
 		State: NewStateStore(),
 		Store: NewStore(),
 		updateParams: types.GetUpdates{
-			Limit:   config.Limit,
-			Timeout: config.Timeout,
-			Offset:  config.Offset,
+			Limit:          config.Limit,
+			Timeout:        config.Timeout,
+			Offset:         config.Offset,
+			AllowedUpdates: config.AllowedUpdates,
 		},
 	}
 }
 
-func (bot *Bot) Run() {
+func (bot *Bot) Run() error {
 	for {
 		select {
 		case <-bot.ctx.Done():
-			return
+			return bot.ctx.Err()
 		default:
-			response, err := bot.API.GetUpdates(bot.ctx, types.GetUpdates{
-				Limit:   100,
-				Timeout: 50,
-				Offset:  bot.updateParams.Offset,
-			})
+			response, err := bot.API.GetUpdates(bot.ctx, bot.updateParams)
 			if err != nil {
-				log.Println("Ошибка получения Update")
-				return
+				return err
 			}
 
 			go func(ctx context.Context, updates []types.Update) {
