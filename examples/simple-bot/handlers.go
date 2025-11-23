@@ -3,31 +3,33 @@ package main
 import (
 	"context"
 	"fmt"
-	"gote/pkg/bot"
+	gotebot "gote/pkg/bot"
 	"gote/pkg/types"
 )
 
-func RequestName(ctx context.Context, update *types.Update, bot *bot.Bot) {
+func RequestName(ctx context.Context, update *types.Update, bot *gotebot.Bot) {
 	id := update.Message.Chat.Id
 	fmt.Println("Введите имя:")
-	bot.SetState(id, writeNameState)
+	bot.State.SetState(id, "writeNameState")
 }
 
-func WriteName(ctx context.Context, update *types.Update, bot *bot.Bot) {
+func WriteName(ctx context.Context, update *types.Update, bot *gotebot.Bot) {
 	id := update.Message.Chat.Id
-	fmt.Println("Имя записано")
-
-	bot.SetState(id, requestMailState)
+	text := update.Message.Text
+	bot.Store.AddData(id, "name", text)
+	nameFromStore := bot.Store.GetData(id, "name")
+	fmt.Println("Из ханилища:", nameFromStore)
+	bot.State.SetState(id, "requestMailState")
 	RequestMail(ctx, update, bot)
 }
 
-func RequestMail(ctx context.Context, update *types.Update, bot *bot.Bot) {
+func RequestMail(ctx context.Context, update *types.Update, bot *gotebot.Bot) {
 	fmt.Println("Введите почту:")
 
 	id := update.Message.Chat.Id
-	bot.SetState(id, writeMailState)
+	bot.State.SetState(id, "writeMailState")
 }
 
-func WriteMail(ctx context.Context, update *types.Update, bot *bot.Bot) {
+func WriteMail(ctx context.Context, update *types.Update, bot *gotebot.Bot) {
 	fmt.Println("Почта записана")
 }
