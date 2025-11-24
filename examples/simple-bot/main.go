@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gote/internal/env"
 	gb "gote/pkg/bot"
-	"log"
 	"os"
 )
 
@@ -26,15 +25,14 @@ func main() {
 	}
 
 	// создание контекста
-	ctx, close := context.WithCancel(context.Background())
-	defer close()
+	ctx, closeFunc := context.WithCancel(context.Background())
+	defer closeFunc()
 
 	// создание бота
 	bot := gb.NewBot(ctx, gb.Config{
-		Token:        token,
-		Limit:        100,
-		Timeout:      50,
-		WorkersCount: 100,
+		Token:   token,
+		Limit:   100,
+		Timeout: 30,
 	})
 
 	// добавление зависимостей (DI)
@@ -54,9 +52,9 @@ func main() {
 	// рабора с командами
 	bot.State.OnCommand("/start", startState)
 
-	// запуск цикла обновлений
-	err := bot.Run()
-	if err != nil {
-		log.Println(err)
+	updates := bot.GetUpdatesChannel()
+	for u := range updates {
+		fmt.Println(u.Message.Text)
 	}
+
 }
