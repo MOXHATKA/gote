@@ -1,7 +1,7 @@
 package types
 
+// ReplyMarkup интерфейс для клавиатуры
 type ReplyMarkup any
-
 {{range .}}
 // {{.Description}}
 {{if .Note}}//

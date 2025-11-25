@@ -1,5 +1,4 @@
 package types
-
 {{range .}}
 // {{.Description}}{{range .List}}
 //  - {{.}}{{end}}

@@ -3,7 +3,7 @@ package updater
 import (
 	"time"
 
-	"gote/pkg/bot"
+	"gote/pkg/core"
 	"gote/pkg/types"
 )
 
@@ -12,7 +12,7 @@ type Updater interface {
 }
 
 type Poller struct {
-	bot          *bot.Bot
+	bot          *core.Bot
 	params       types.GetUpdates
 	errorBackoff time.Duration
 	bufferSize   int64
@@ -20,7 +20,7 @@ type Poller struct {
 
 type PollerOption func(*Poller)
 
-func NewPoller(b *bot.Bot, opts ...PollerOption) *Poller {
+func NewPoller(b *core.Bot, opts ...PollerOption) *Poller {
 	p := &Poller{
 		bot: b,
 		params: types.GetUpdates{
@@ -69,9 +69,9 @@ func (p *Poller) Start() <-chan types.Update {
 				return
 			}
 
-			updates, err := p.bot.API().GetUpdates(p.bot.Context(), p.params)
+			updates, err := p.bot.GetUpdates(p.bot.Context(), p.params)
 			if err != nil {
-				p.bot.Logger().Printf("Ошибка получения обновлений: %v", err)
+				p.bot.Logger().Error("Ошибка получения обновлений: %v", err)
 				select {
 				case <-time.After(p.errorBackoff):
 				case <-p.bot.Context().Done():

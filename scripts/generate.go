@@ -199,7 +199,7 @@ func main() {
 	tamplatesPath := "./templates/"
 	outputDir := "./pkg/"
 	typesDir := "types/"
-	methodsDir := "api/"
+	methodsDir := "core/"
 	templatesData := []TemplateData{
 		{Name: "types", Path: tamplatesPath, OutputPath: outputDir + typesDir, Data: types},
 		{Name: "params", Path: tamplatesPath, OutputPath: outputDir + typesDir, Data: params},
