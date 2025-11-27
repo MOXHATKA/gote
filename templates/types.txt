@@ -4,16 +4,18 @@ package types
 //  - {{.}}{{end}}
 {{if .Note}}//
 // {{.Note}}
-//{{else}}// {{end}}
-// https://core.telegram.org/bots/api#{{.Link}}
-type {{.NameUpperCamelCase}} {{if and .List (not .Fields)}}interface{{else}}struct{{end}} {
+//{{else}}// {{end}}{{if and .List (not .Fields)}}
+//
+// Use types.CastTo[*type*](*data*)
+//{{end}}
+// https://core.telegram.org/bots/api{{.Link}}{{if and .List (not .Fields)}}
+type {{.NameUpperCamelCase}} map[string] any
+{{else}}
+type {{.NameUpperCamelCase}} struct {
 	{{range .Fields}}
 	// {{.Description}}
 	{{.NameUpperCamelCase}} {{.TypeField}} `json:"{{.NameSnakeCase}}{{if not .Required}},omitempty{{end}}"`
 	{{else}} {{if .List}} Is{{.NameUpperCamelCase}}() {{end}} {{end}}
-}{{if and .List (not .Fields)}}{{$obj := .}}
-{{range .List}}
-func (x {{.}}) Is{{$obj.NameUpperCamelCase}}() {}
-{{end}}
+}
 {{end}}
 {{end}}

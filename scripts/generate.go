@@ -282,10 +282,10 @@ func getAttributeValue(text string, attr string) string {
 	offsetStart := strings.Index(text[indexAttr:], "\"")
 	indexStart := offsetStart + indexAttr
 
-	offsetEnd := strings.Index(text[indexStart + 1:], "\"")
+	offsetEnd := strings.Index(text[indexStart+1:], "\"")
 	indexEnd := offsetEnd + 1 + indexStart
 
-	value := text[indexStart + 1: indexEnd]
+	value := text[indexStart+1 : indexEnd]
 
 	return value
 }

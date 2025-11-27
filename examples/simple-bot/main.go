@@ -33,11 +33,17 @@ func main() {
 	updates := poller.Start()
 	for u := range updates {
 		if cb := u.CallbackQuery; cb != nil {
-			b.SendMessage(ctx, types.SendMessage{
-				ChatId: u.CallbackQuery.Message.Chat.Id,
-				Text:   "text " + u.CallbackQuery.Data,
-			},
-			)
+			message, err := types.CastTo[types.Message](cb.Message)
+			if err != nil {
+				b.Logger().Error(err.Error())
+			}
+
+			b.Logger().Info(message.Text)
+			// b.SendMessage(ctx, types.SendMessage{
+			// 	ChatId: u.CallbackQuery.Message),
+			// 	Text:   "text " + u.CallbackQuery.Data,
+			// },
+
 		}
 
 		if msg := u.Message; msg != nil {

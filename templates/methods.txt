@@ -23,7 +23,7 @@ type tgResponse[T any] struct {
 {{if .Note}}//
 // {{.Note}}
 //{{else}}// {{end}}
-// https://core.telegram.org/bots/api#{{.Link}}
+// https://core.telegram.org/bots/api{{.Link}}
 func (bot *Bot) {{.NameUpperCamelCase}}(ctx context.Context, param types.{{.NameUpperCamelCase}}) ({{.ReturnType}}, error) {
 	data, err := json.Marshal(param)
 	if err != nil {
