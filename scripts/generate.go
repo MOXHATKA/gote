@@ -191,7 +191,7 @@ func main() {
 		data = data[block.indexEnd:]
 	}
 
-	type TemplateData struct {
+	type templateData struct {
 		Name       string
 		Path       string
 		OutputPath string
@@ -202,7 +202,7 @@ func main() {
 	outputDir := "./pkg/"
 	typesDir := "types/"
 	methodsDir := "core/"
-	templatesData := []TemplateData{
+	templatesData := []templateData{
 		{Name: "types", Path: tamplatesPath, OutputPath: outputDir + typesDir, Data: types},
 		{Name: "params", Path: tamplatesPath, OutputPath: outputDir + typesDir, Data: params},
 		{Name: "methods", Path: tamplatesPath, OutputPath: outputDir + methodsDir, Data: params},
