@@ -38,11 +38,10 @@ func main() {
 				b.Logger().Error(err.Error())
 			}
 
-			b.Logger().Info(message.Text)
-			// b.SendMessage(ctx, types.SendMessage{
-			// 	ChatId: u.CallbackQuery.Message),
-			// 	Text:   "text " + u.CallbackQuery.Data,
-			// },
+			b.SendMessage(ctx, types.SendMessage{
+				ChatId: message.Chat.Id,
+				Text:   "Вы выбрали: " + u.CallbackQuery.Data,
+			})
 
 		}
 
