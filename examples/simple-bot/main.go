@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"gote/internal/env"
-	"gote/pkg/core"
-	"gote/pkg/types"
-	"gote/pkg/updater"
 	"os"
+
+	"github.com/MOXHATKA/gote/internal/env"
+	"github.com/MOXHATKA/gote/pkg/core"
+	"github.com/MOXHATKA/gote/pkg/types"
+	"github.com/MOXHATKA/gote/pkg/updater"
 )
 
 func main() {

@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"gote/pkg/types"
 	"net/http"
+
+	"github.com/MOXHATKA/gote/pkg/types"
 )
 
 // URL - адресс Telegram Bot API
