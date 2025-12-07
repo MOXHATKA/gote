@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/MOXHATKA/gote/pkg/types"
+	"github.com/WORKHATERS/gote/pkg/types"
 )
 
 // URL - адресс Telegram Bot API
@@ -30,7 +30,7 @@ func (bot *Bot) {{.NameUpperCamelCase}}(ctx context.Context, param types.{{.Name
 	if err != nil {
 		return {{.ReturnValue}}, err
 	}
-	
+
 	url := URL + bot.token + "/{{.NameUpperCamelCase}}"
 	req, err := http.NewRequestWithContext(ctx, "GET", url, bytes.NewBuffer(data))
 	if err != nil {
@@ -43,7 +43,7 @@ func (bot *Bot) {{.NameUpperCamelCase}}(ctx context.Context, param types.{{.Name
 	if err != nil {
 		return {{.ReturnValue}}, err
 	}
-	
+
 	var result tgResponse[{{.ReturnType}}]
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return {{.ReturnValue}}, err

@@ -2,13 +2,13 @@
 
 **gote** — это современная, минималистичная и удобная библиотека для работы с [Telegram Bot API](https://core.telegram.org/bots/api) на языке **Go**.
 Она предоставляет полный доступ ко всем возможностям Telegram: сообщения, медиа, клавиатуры, команды, callback-запросы, webhooks, inline-режим и многое другое.
-
+[Bot API 9.2](https://core.telegram.org/bots/api#august-15-2025) от 15 августа 2025 года.
 ---
 
 ## Установка
 
 ```bash
-go get github.com/MOXHATKA/gote
+go get github.com/WORKHATERS/gote
 ```
 
 ---
@@ -21,9 +21,9 @@ go get github.com/MOXHATKA/gote
    import (
    	"context"
 
-   	"github.com/MOXHATKA/gote/pkg/core"
-   	"github.com/MOXHATKA/gote/pkg/types"
-   	"github.com/MOXHATKA/gote/pkg/updater"
+   	"github.com/WORKHATERS/gote/pkg/core"
+   	"github.com/WORKHATERS/gote/pkg/types"
+   	"github.com/WORKHATERS/gote/pkg/updater"
    )
 
    func main() {
@@ -57,7 +57,6 @@ go get github.com/MOXHATKA/gote
 | `pkg/core`     | Основной объект `Bot`, методы API, отправка запросов, логирование.                                   |
 | `pkg/updater`  | Механизм получения обновлений (polling или webhook).                                                 |
 | `pkg/types`    | Типы данных, соответствующие Telegram Bot API (сообщения, медиа, чаты, пользователи, кнопки и т.д.). |
-| `internal/env` | Утилита для загрузки конфигурации из `.env` файлов.                                                  |
 
 ---
 
@@ -122,4 +121,4 @@ go get github.com/MOXHATKA/gote
 
 ## Лицензия
 
-MIT License © 2025 MOXHATKA
+MIT License © 2025 WORKHATERS

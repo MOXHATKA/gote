@@ -3,8 +3,8 @@ package updater
 import (
 	"time"
 
-	"github.com/MOXHATKA/gote/pkg/core"
-	"github.com/MOXHATKA/gote/pkg/types"
+	"github.com/WORKHATERS/gote/pkg/core"
+	"github.com/WORKHATERS/gote/pkg/types"
 )
 
 // Updater интерфейс для получателей обновлений

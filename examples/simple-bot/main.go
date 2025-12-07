@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
-	"github.com/MOXHATKA/gote/internal/env"
-	"github.com/MOXHATKA/gote/pkg/core"
-	"github.com/MOXHATKA/gote/pkg/types"
-	"github.com/MOXHATKA/gote/pkg/updater"
+	"github.com/WORKHATERS/gote/internal/env"
+	"github.com/WORKHATERS/gote/pkg/core"
+	"github.com/WORKHATERS/gote/pkg/types"
+	"github.com/WORKHATERS/gote/pkg/updater"
 )
 
 func main() {
